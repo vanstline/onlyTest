@@ -2,6 +2,7 @@
   <div class="more">
     <scroller
       class="contents"
+      ref="scroller2"
       :on-refresh="refresh"
       :on-infinite="infinite"
       >
@@ -22,7 +23,7 @@
         <span slot="label">返回</span>
       </tabbar-item>
       <tabbar-item selected>
-        <span slot="label">收藏</span>
+        <span slot="label" :class="{test: isclick}" @click="click22">收藏</span>
       </tabbar-item>
       <tabbar-item @on-item-click="click" link="/review" selected>
         <span slot="label">评论</span>
@@ -51,7 +52,8 @@
           titleText: null,
           contents: null
         },
-        textInfo: null
+        textInfo: null,
+        isclick: false
       }
     },
     components: {
@@ -75,6 +77,10 @@
       click() {
         this.$store.commit('setId',this.id)
       },
+      click22() {
+        this.isclick = !this.isclick;
+        console.log(this.isclick)
+      },
       _getMore() {
         if(this.id == undefined){
           return
@@ -94,10 +100,10 @@
         this.id = this.$route.params.id
       },
       refresh(){
-        return
+        this.$refs.scroller2.finishPullToRefresh();
       },
       infinite(){
-        return
+        this.$refs.scroller2.finishInfinite();
       }
     }
 
@@ -115,6 +121,9 @@
     // height: 100%;
     z-index: 100;
     background: #fff;
+    .test {
+      color: red;
+    }
     .load {
       position: absolute;
       top: 0;
@@ -135,9 +144,9 @@
       top: 0;
       left: 0;
       right: 0;
-      height: 85% !important;
-      padding-bottom: 1rem;
+      height: 110% !important;
       // 以上两条 用来解决滚动底部给不了高度的问题
+      margin-bottom: -.5rem;
       font-size: 18px;
       .headerInfo {
         position: relative;

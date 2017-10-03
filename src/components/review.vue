@@ -1,16 +1,21 @@
 <template>
   <div class="review">
-    <div class="cont" v-if="newReview">
-      <h3>{{newReview.length}}条评论</h3>
-      <ul>
-        <li v-for="i in newReview">
-          <h4>{{i.author}}<i>{{i.likes}}</i></h4>
-          <p>{{i.content}}</p>
-          <span class="time">{{i.time}}</span>
-          <img :src="i.avatar" alt="">
-        </li>
-      </ul>
-    </div>
+    <scroller
+     class="cont" v-if="newReview"
+      >
+      <div>
+        <h3>{{newReview.length}}条评论</h3>
+        <ul>
+          <li v-for="i in newReview">
+            <h4>{{i.author}}<i>{{i.likes}}</i></h4>
+            <p>{{i.content}}</p>
+            <span class="time">{{i.time}}</span>
+            <img :src="i.avatar" alt="">
+          </li>
+        </ul>
+        <div class="perch"></div>
+      </div>
+    </scroller>
     <Group class="bottom" v-if="newReview" gutter="0">
 
       <router-link class="back" v-bind:to="more">返回</router-link>
@@ -51,23 +56,41 @@
       XTextarea
     },
     created() {
-      this.getReview();
+      // this.getReview();
+      this.id = this.$store.state.id;
+      this.more = 'more/' + this.id;
+      console.log(this.id);
+
+      this.getData()
+      // console.log(this.$store.state.review);
+    },
+    computed: {
+
     },
     methods: {
-      getReview() {
-        this.id = this.$store.state.id
-        let api = 'https://zhihu-daily.leanapp.cn/api/v1/contents/';
-        let reviewEnd = '/short-comments';
-        axios.get(api+this.id+reviewEnd).then(res => {
-          let newDate = res.data.COMMENTS.comments;
-          for(var i in newDate) {
-            newDate[i].time = getTime(newDate[i].time)
-          };
-          console.log(newDate);
-          this.newReview = newDate;
-          this.more = 'more/' + this.id
-          console.log(this.more);
-
+      // getReview() {
+      //   this.id = this.$store.state.id
+      //   let api = 'https://zhihu-daily.leanapp.cn/api/v1/contents/';
+      //   let reviewEnd = '/short-comments';
+      //   axios.get(api+this.id+reviewEnd).then(res => {
+      //     let newDate = res.data.COMMENTS.comments;
+      //     for(var i in newDate) {
+      //       newDate[i].time = getTime(newDate[i].time)
+      //     };
+      //     console.log(newDate);
+      //     this.newReview = newDate;
+      //     this.more = 'more/' + this.id
+      //     console.log(this.more);
+      //
+      //   })
+      // },
+      getData() {
+        let pro = new Promise((resolve, reject) => {
+          this.$store.dispatch('getReview',this.id);
+          resolve()
+        })
+        pro.then(() => {
+          this.newReview = this.$store.state.review;
         })
       },
       write() {
@@ -86,14 +109,18 @@
         this.Time = getTime(this.Time)
         console.log(this.Time);
 
-        let obj = {
+        let obj = [{
           author: 'Tao',
           avatar: 'https://b-ssl.duitang.com/uploads/item/201510/18/20151018215700_KiTvZ.png',
           likes: 0,
           content: this.msg,
           time: this.Time
-        };
-        this.newReview.push(obj);
+        }];
+        // console.log(obj);
+
+        // this.$store.dispatch('concatView',obj, this.newReview)
+        this.$store.commit('concatView',obj);
+        this.newReview = this.$store.state.review;
         this.msg = '';
         this.SOH = false;
       }
@@ -178,6 +205,9 @@
             border-radius: 50%;
           }
         }
+      }
+      .perch {
+        height: 1.6rem;
       }
     }
     .bottom {

@@ -24,6 +24,7 @@
         <div class="news">
           <panel
           class="panel"
+          @on-click-item="stop"
           :list="newsList"
           ></panel>
         </div>
@@ -32,6 +33,7 @@
           <h2 class="date">{{oldDate[index]}}</h2>
           <panel
           class="panel"
+          @on-click-item="stop"
           :list="item">
           </panel>
         </div>
@@ -44,7 +46,8 @@
 <script>
   import { Swiper, Panel } from 'vux';
   import {mapMutations } from 'vuex'
-  import { getAxios } from '../api/index'
+  import { getAxios } from '@/api/index'
+  import axios from 'axios'
 
   // 处理日期的函数
   var nowDate = new Date();
@@ -95,9 +98,9 @@
     },
     methods: {
       _getAxios() {
-        getAxios(this.data).then( res => {
+        axios('https://zhihu-daily.leanapp.cn/api/v1/last-stories').then( res => {
           console.log(res.data);
-          this.swiperList = res.data.top_stories.map( item => {
+          this.swiperList = res.data.STORIES.top_stories.map( item => {
             return {
               url: `/more/${item.id}`,
               img: item.image,
@@ -105,7 +108,7 @@
             }
           })
           // 新闻的数据
-          this.newsList =  res.data.stories.map(item => {
+          this.newsList =  res.data.STORIES.stories.map(item => {
             return {
               url: `/more/${item.id}`,
               src: item.images[0],
@@ -149,12 +152,12 @@
         moreLoaded = false;
         num++;
         console.log(num);
-        getAxios(`/news/before/${getDate(nowDate)[0]}`)
+        axios(`https://zhihu-daily.leanapp.cn/api/v1/before-stories/${getDate(nowDate)[0]}`)
         .then( res => {
           // console.log(res.data);
           // 新闻的数据
           this.oldDate.push(getDate(nowDate)[1]);
-          this.oldList =  res.data.stories.map(item => {
+          this.oldList =  res.data.STORIES.stories.map(item => {
             return {
               id: item.id,
               url: `/more/${item.id}`,
@@ -166,13 +169,14 @@
 
           this.allOldList.push(this.oldList);
           console.log(this.allOldList);
-          setTimeout(() => {
-            this.$refs.myscroller.finishInfinite();
-            moreLoaded = true;
-
-          },2000)
+          this.$refs.myscroller.finishInfinite();
+          moreLoaded = true;
         })
         nowDate -= dis;
+      },
+      stop() {
+        console.log('停');
+        this.$refs.myscroller.finishInfinite();
       }
     }
   }
@@ -183,9 +187,9 @@
 
   #app {
     .scroller {
-      // margin-top: .8rem;
-      margin-top: 0;
-      margin-bottom: -.8rem;
+      margin-top: .8rem;
+      // margin-top: 0;
+      // margin-bottom: -.8rem;
       width: 100%;
       .pull-to-refresh-layer {
         height: 0;

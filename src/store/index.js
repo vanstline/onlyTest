@@ -1,3 +1,10 @@
+// 时间日期格式转换
+function getTime(time) {
+  // 这里接受的ms 而数据传递过来的是m
+  return new Date(parseInt(time)*1000).toLocaleString().replace(/:\d{1,2}$/,' ').slice(5).replace(/\//g,'-');
+  // 这里省略了年份
+}
+
 import Vue from 'vue';
 import Vuex from 'vuex';
 // import getAxios from '@/api/index'
@@ -12,7 +19,7 @@ export default new Vuex.Store({
       newList: [],
       oldList: null,
       initLoaded: null,
-      newReview: []
+      review: []
   },
   getters: {
     retBanner: state => state.bannerList,
@@ -36,6 +43,15 @@ export default new Vuex.Store({
     set(state,data) {
       console.log(data);
       state.initLoaded = data
+    },
+    setReview(state, data) {
+      state.review = data
+    },
+    concatView(state, obj) {
+      console.log(obj);
+      console.log(state.review);
+      state.review = obj.concat(state.review)
+      console.log(state.review);
     }
   },
   actions: {
@@ -65,8 +81,27 @@ export default new Vuex.Store({
         commit('setBannerList', Banner);
         commit('setNewList', retNewList);
       })
+    },
+    getReview({commit,store},id) {
+
+      let api = 'https://zhihu-daily.leanapp.cn/api/v1/contents/';
+      let reviewEnd = '/short-comments';
+      axios.get(api+id+reviewEnd).then(res => {
+        let newDate = res.data.COMMENTS.comments;
+        for(var i in newDate) {
+          newDate[i].time = getTime(newDate[i].time)
+        };
+        console.log(newDate);
+        commit('setReview',newDate)
+
+      })
     }
-    
+    // ,
+    // concatView({commit,store},obj, oldReview) {
+    //   console.log(obj);
+    //   console.log(oldReview);
+    // }
+
 
   }
 })

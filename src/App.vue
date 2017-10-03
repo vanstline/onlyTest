@@ -80,7 +80,7 @@
       padding: 0;
       height: .8rem;
       width: 100%;
-      background-color:rgba(0, 156, 255, .3);
+      background-color:rgba(0, 156, 255, .5);
     }
     .aside>div {
       float: left;
